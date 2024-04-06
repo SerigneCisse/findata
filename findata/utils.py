@@ -3,6 +3,30 @@ import os
 from copy import deepcopy
 from pathlib import Path
 
+
+def convert_string_to_number(s):
+    """
+    Convert a string to a float or int, handling cases with multiple periods and commas.
+    Assumes the last period marks the decimal place if multiple periods are present.
+    """
+    # Remove spaces and replace commas with periods
+    s = s.replace(" ", "").replace(",", ".").strip()
+    
+    # Handle numbers with multiple periods
+    if s.count('.') > 1:
+        parts = s.split('.')
+        whole_part = ''.join(parts[:-1])
+        decimal_part = parts[-1]
+        s = whole_part + '.' + decimal_part
+        
+    try:
+        # Attempt to convert to float, then to int if it's a whole number
+        number = float(s)
+        return int(number) if number.is_integer() else number
+    except ValueError:
+        # Return original string if conversion fails
+        return s
+
 class TickerError(ValueError):
     pass
 
