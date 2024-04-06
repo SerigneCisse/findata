@@ -5,6 +5,8 @@ import re
 from . import utils
 
 
+
+
 class MarketscreenerReader:
     _base_url = "https://www.marketscreener.com"
     
@@ -164,15 +166,31 @@ class MarketscreenerReader:
 
                 if cell.text.strip() == "-":
                     value = None
+                # else:
+                #     value = cell.text.replace(" ", "").replace(",", ".").strip()
+                #     if name in ("Operating Margin", "Net Margin", "FCF Margin", "FCF Conversion"):
+                #         value = float(value.replace("%", ""))  / 100
+                #     elif name in ("EPS", "Dividend Per Share"):
+                #         value = float(value)
+                #     else:
+                #         value = int(float(value) * 1e6)
+                # data[year][name] = value
+
+
+
+
                 else:
-                    value = cell.text.replace(" ", "").replace(",", ".").strip()
+                    value = utils.convert_string_to_number(cell.text)
                     if name in ("Operating Margin", "Net Margin", "FCF Margin", "FCF Conversion"):
-                        value = float(value.replace("%", ""))  / 100
+                        if isinstance(value, str) and "%" in value:
+                            value = float(value.replace("%", "")) / 100
+                        elif isinstance(value, (float, int)):
+                            value = value / 100
                     elif name in ("EPS", "Dividend Per Share"):
-                        value = float(value)
+                        value = float(value) if not isinstance(value, float) else value
                     else:
-                        value = int(float(value) * 1e6)
-                data[year][name] = value
+                        value = int(value * 1e6) if isinstance(value, float) else value
+                    data[year][name] = value
 
                 analysts = cell.get("title")
                 if analysts is not None:
